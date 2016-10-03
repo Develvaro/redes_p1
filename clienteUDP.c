@@ -4,29 +4,31 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* --------------------------------------------------------------------------------------
- 
- Envía un número aleatorio al servidor, quien el devuelve el número incremetnado
+
+ Envï¿½a un nï¿½mero aleatorio al servidor, quien el devuelve el nï¿½mero incremetnado
 
 ---------------------------------------------------------------------------------------- */
- 
+
 main ( )
 {
-  
-		/*---------------------------------------------------- 
-			Descriptor del socket y buffer para datos 
+
+		/*----------------------------------------------------
+			Descriptor del socket y buffer para datos
 		-----------------------------------------------------*/
 		int Socket_Cliente;
-		int Datos;
-   
+		char req[500] = "HOLA SERVIDOR";
+		char res[500] = "";
+
    	/* -----------------------------------------------------
    		Informaci\ufffdn del Servidor
    	-----------------------------------------------------*/
-   	struct sockaddr_in Servidor;  
+   	struct sockaddr_in Servidor;
    	socklen_t Longitud_Servidor;
-  
-  
+
+
    	/* --------------------------------------------------
 			Se abre el socket cliente
 		---------------------------------------------------*/
@@ -34,7 +36,7 @@ main ( )
 		if (Socket_Cliente == -1)
 		{
 			printf ("No se puede abrir el socket cliente\n");
-    		exit (-1);	
+    		exit (-1);
 		}
 
  		/*---------------------------------------------------------------------
@@ -45,42 +47,42 @@ main ( )
 		Servidor.sin_port = htons(2000);
 		Servidor.sin_addr.s_addr =  inet_addr("127.0.0.1");
   	 	Longitud_Servidor = sizeof(Servidor);
-	
+
 
 		/*------------------------------------------------------------------------
 			Se genera un n\ufffdmero aleatorio, que es el que se le manda al
 			servidor.
 		------------------------------------------------------------------------ */
-   	srand (time(NULL)); /* Semilla para n\ufffdmeros aleatorios */
-   	Datos = rand()%20;  /* Aleatorio entre 0 y 19 */
-   	printf ("Envio %d\n", Datos);
+   	//srand (time(NULL)); /* Semilla para n\ufffdmeros aleatorios */
+   	//req = rand()%20;  /* Aleatorio entre 0 y 19 */
+   	printf ("Envio %s\n", req);
 
-   	
+
 		/*-----------------------------------------------------------------------
 			Se env\ufffda mensaje al Servidor
 		-----------------------------------------------------------------------*/
-		int enviado = sendto (Socket_Cliente, (char *) &Datos, sizeof(Datos), 0,
+		int enviado = sendto (Socket_Cliente, &req, sizeof(req), 0,
 			(struct sockaddr *) &Servidor, Longitud_Servidor);
-   
+
    	if (enviado < 0)
     	{
 			printf("Error al solicitar el servicio\n");
 		}
     	else
 		{
-   
+
 		/*----------------------------------------------------------------------
 			Esperamos la respuesta del Servidor
-			----------------------------------------------------------------------- */ 
-			int recibido = recvfrom (Socket_Cliente, (char *)&Datos, sizeof(Datos), 0,
+			----------------------------------------------------------------------- */
+			int recibido = recvfrom (Socket_Cliente, &res, sizeof(res), 0,
 			(struct sockaddr *) &Servidor, &Longitud_Servidor);
-			
+
    		if (recibido > 0)
-      		printf ("Leido %d\n", Datos);
+      		printf ("Leido %s\n", res);
    		else
       		printf ("Error al leer del servidor\n");
-		
+
 		}
-		
+
 		close(Socket_Cliente);
 }

@@ -4,29 +4,29 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 /*
  * El servidor ofrece el servicio de incrementar un n\ufffdmero recibido de un cliente
  */
- 
+
 main ()
 {
-	/*---------------------------------------------------- 
-		Descriptor del socket y buffer de datos                
+	/*----------------------------------------------------
+		Descriptor del socket y buffer de datos
 	-----------------------------------------------------*/
 	int Socket_Servidor;
 	struct sockaddr_in Servidor;
-	int contador = 0;
-	
-	
+	char req[500] = "aa";
+	char res[500] = "Default Response";
+
 	/* -----------------------------------------------------
    		Informaci\ufffdn del Cliente
    	-----------------------------------------------------*/
-   struct sockaddr_in Cliente;
+  struct sockaddr_in Cliente;
 	socklen_t Longitud_Cliente;
-	
-	
+
+
 	/* --------------------------------------------------
 		Se abre el socket Servidor
 	---------------------------------------------------*/
@@ -34,7 +34,7 @@ main ()
 	if (Socket_Servidor == -1)
 	{
 		printf ("No se puede abrir socket servidor\n");
-		exit (-1);	
+		exit (-1);
 	}
 
 	/* ------------------------------------------------------------------
@@ -43,24 +43,24 @@ main ()
 	-------------------------------------------------------------------*/
 	Servidor.sin_family = AF_INET;
 	Servidor.sin_port = htons(2000);
-	Servidor.sin_addr.s_addr = htonl(INADDR_ANY); 
+	Servidor.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	if (bind (Socket_Servidor, (struct sockaddr *)&Servidor, sizeof (Servidor)) == -1)
 	{
 		close (Socket_Servidor);
 		exit (-1);
 	}
-	
+
 
   	/*---------------------------------------------------------------------
-		Del cliente s\ufffdlo necesitamos el tama\ufffdo de su estructura, el 
-		resto de informaci\ufffdn (familia, puerto, ip), la obtendremos 
+		Del cliente s\ufffdlo necesitamos el tama\ufffdo de su estructura, el
+		resto de informaci\ufffdn (familia, puerto, ip), la obtendremos
 		nos la proporcionar\ufffd el propio m\ufffdtodo recvfrom, cuando
 		recibamos la llamada de un cliente.
    ----------------------------------------------------------------------*/
 	Longitud_Cliente = sizeof (Cliente);
 
-   	
+
 	/*-----------------------------------------------------------------------
 		El servidor espera continuamente los mensajes de los clientes
 	------------------------------------------------------------------------ */
@@ -69,29 +69,28 @@ main ()
     /* -----------------------------------------------------------------
 			Esperamos la llamada de alg\ufffdn cliente
 		-------------------------------------------------------------------*/
-      	int recibido = recvfrom (Socket_Servidor, &contador, sizeof(contador), 0,
+      int recibido = recvfrom (Socket_Servidor, &req, sizeof(req), 0,
 			(struct sockaddr *) &Cliente, &Longitud_Cliente);
 
 		/* -----------------------------------------------------------------
-			Comprobamos si hemos recibido alguna informaci\ufffdn 
+			Comprobamos si hemos recibido alguna informaci\ufffdn
 		-------------------------------------------------------------------*/
 		if (recibido > 0)
 		{
 			/*-----------------------------------------------------------------
-				Incrementamos el valor que nos ha enviado el cliente 
+				Incrementamos el valor que nos ha enviado el cliente
 				------------------------------------------------------------------*/
-      	printf ("Recibido %d, envio %d\n", contador, contador+1);
-			contador++;
-      
+      	printf ("Recibido %s, envio %s\n", req,res);
+
       	/* ------------------------------------------------------------------
 				Devolvemos el n\ufffdmero incrementado al cliente
 				--------------------------------------------------------------------*/
-			int enviado = sendto (Socket_Servidor, &contador, sizeof(contador), 0,
+			int enviado = sendto (Socket_Servidor, &res, sizeof(res), 0,
 			(struct sockaddr *) &Cliente, Longitud_Cliente);
 
 		}
 
     }
-	 
+
 	 close(Socket_Servidor);
 }
